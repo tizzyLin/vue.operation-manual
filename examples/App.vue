@@ -23,9 +23,9 @@ export default {
       guide_tpls: [
         {
           type: 'manual1',
-          title: 'Manual111 1222 111111111111111',
+          title: 'Test Manual1',
           start_task_types: ['task1'],
-          desc: '这是 Test Manual 的描述',
+          desc: '这是 Test Manual1 的描述',
         },
         {
           type: 'manual2',
