@@ -1,0 +1,32 @@
+{
+  "name": "operation-manual",
+  "version": "1.0.1",
+  "description": "",
+  "main": "packages/operationManual/index.js",
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --target lib --name todolist --dest lib packages/todoList/index.js",
+    "test": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "core-js": "^3.0.0",
+    "uuid": "^3.0.0",
+    "velocity-animate": "^1.4.0",
+    "vue": "^2.0.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.2.3",
+    "@vue/cli-service": "^4.2.3",
+    "@vue/test-utils": "1.0.0-beta.31"
+  },
+  "keywords": [
+    "manual",
+    "guide",
+    "todo",
+    "process",
+    "task"
+  ],
+  "author": "tizzylin@qq.com",
+  "license": "ISC"
+}
