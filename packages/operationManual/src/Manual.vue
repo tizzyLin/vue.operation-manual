@@ -1,12 +1,10 @@
 <template>
-    <div tabindex="-1" @blur="hideGuideSelector" style="border-radius: 4px; min-width: 16em; word-break: break-word;">
-        <div class="normal_border" style="padding: 0.5em 0.8em;">
-            <div @click.stop="guide_selector_show = !guide_selector_show" class="title" style="cursor: pointer;">{{ title }}</div>
+    <div tabindex="-1" style="border-radius: 4px; min-width: 16em; word-break: break-word;">
+        <div class="normal_border" style="padding: 0.5em 0; position: relative;">
+            <div @click.stop="guide_selector_show = !guide_selector_show" class="title" style="cursor: pointer; padding: 0 0.8em;">{{ title }}</div>
             <transition name="normal_transition">
-                <div style="position: relative;">
-                    <div v-show="guide_selector_show" class="guide_selector normal_border" style="padding: 0.3em 0.8em;">
-                        <div v-for="guide_tpl in guide_tpls" v-if="!guide_tpl.hidden" @click="newGuide(guide_tpl)" class="title" style="cursor: pointer;">{{ guide_tpl.title }}</div>
-                    </div>
+                <div v-show="guide_selector_show" class="guide_selector normal_border" style="padding: 0.5em 0; width: 100%;">
+                    <div v-for="guide_tpl in guide_tpls" v-if="!guide_tpl.hidden" @click="newGuide(guide_tpl)" class="guide_tpl_option">{{ guide_tpl.title }}</div>
                 </div>
             </transition>
         </div>
@@ -14,7 +12,7 @@
             <div v-for="guide in value" :key="guide.id" class="normal_border" style="margin-top: 0.5em;">
                 <div style="border-bottom: 1px solid #d7d7d7; padding: 0.5em 0.8em 0.3em;">
                     <tooltip :placement="guide_tpls_map[guide.type].desc ? desc_placement : 'none'" style="width: 100%;">
-                        <div slot="tip" v-if="guide_tpls_map[guide.type].desc" style="width: 100%;">
+                        <div slot="tip" v-if="guide_tpls_map[guide.type].desc" class="desc" style="width: 100%;">
                             {{ guide_tpls_map[guide.type].desc }}
                         </div>
                         <div class="title" style="float: left; width: calc(100% - 4em);">{{ guide_tpls_map[guide.type].title }}</div>
@@ -23,31 +21,31 @@
                                 <div @click="undo(guide)" style="display: inline-block; margin-left: 0.1em;">
                                     <Icon type="md-undo" :disabled="guide.version === 0" title="undo" style="cursor: pointer;"></Icon>
                                 </div>
-                                <div @click="redo(guide)" style="display: inline-block; margin-left: 0.1em;">
+                                <div v-if="guide_tpls_map[guide.type].allow_redo" @click="redo(guide)" style="display: inline-block; margin-left: 0.1em;">
                                     <Icon type="md-redo" :disabled="guide.version >= guide.histories.length" title="redo" style="cursor: pointer;"></Icon>
                                 </div>
-                                <div @click="removeGuide(guide)" style="display: inline-block; margin-left: 0.1em;">
-                                    <Icon type="md-close" title="remove" style="cursor: pointer;"></Icon>
-                                </div>
                             </template>
+                            <div @click="removeGuide(guide)" style="display: inline-block; margin-left: 0.1em;">
+                                <Icon type="md-close" title="remove" style="cursor: pointer;"></Icon>
+                            </div>
                         </div>
                     </tooltip>
                 </div>
                 <!--                <transition-group name="task_transition" tag="div" style="padding: 0.2em 0.8em;">-->
-                <transition-group tag="div" style="padding: 0.4em 0.8em 0;" v-bind:css="false"
+                <transition-group tag="div" class="tasks" v-bind:css="false"
                                   v-on:enter="transitionTaskEnter" v-on:leave="transitionTaskLeave">
-                    <div v-for="task in guide.tasks" :key="task.id" v-if="task.state=='active'">
+                    <div v-for="task in guide.tasks" :key="task.id" v-if="task.state=='active'" class="task">
                         <tooltip :placement="task.desc ? desc_placement : 'none'" style="width: 100%;">
-                            <div slot="tip" v-if="task.desc" style="width: 100%;">{{ task.desc }}</div>
+                            <div slot="tip" v-if="task.desc" class="desc" style="width: 100%;">{{ task.desc }}</div>
 
-                            <div class="title" style="float: left;">{{ task.title }}</div>
-                            <div style="float: right; line-height: 1em;">
+                            <div class="title" style="display: table-cell;width: 100%;">{{ task.title }}</div>
+                            <div style="display: table-cell; line-height: 1em; margin-left: 0.5em; white-space: nowrap;">
                                 <div v-if="task_tpls_map[task.type].show_do_button" @click="onTaskDoClick(guide, task)" class="normal_border"
-                                     style="cursor: pointer; padding: 0.5em 1em; min-width: 3em; text-align: center; font-size: 0.8em; background-color: #277FFF; border-color: #277FFF; color: white;">
+                                     style="cursor: pointer; padding: 0.5em 1em; text-align: center; font-size: 0.8em; background-color: #277FFF; border-color: #277FFF; color: white;">
                                     {{ task_tpls_map[task.type].do_button_title }}
                                 </div>
                                 <div v-if="task_tpls_map[task.type].show_done_button" @click="onTaskDoneClick(guide, task)"
-                                     style="cursor: pointer; padding: 0.2em 1em 0; min-width: 3em; text-align: center; font-size: 0.8em; color: #277FFF;">
+                                     style="cursor: pointer; padding: 0.2em 1em 0; text-align: center; font-size: 0.8em; color: #277FFF;">
                                     {{ task_tpls_map[task.type].done_button_title }}
                                 </div>
                             </div>
@@ -81,6 +79,10 @@ export default {
     desc_placement: {
       type: String,
       default: 'top-start',
+    },
+    filterable: {
+      type: Boolean,
+      default: true,
     },
     debug: {
       type: Boolean,
@@ -119,6 +121,7 @@ export default {
       start_task_inputs: {required: false, default: {}, types: ['object']},
       hidden: {required: false, default: false, types: ['boolean']},
       allow_undo: {required: false, default: true, types: ['boolean']},
+      allow_redo: {required: false, default: true, types: ['boolean']},
       beforeRemove: {required: false, default: () => {return true;}, types: ['function']},
     };
     this.guide_tpls.forEach(guide_tpl => {
@@ -202,8 +205,15 @@ export default {
     // endregion
 
     this.value.forEach(guide => {
-      guide = false;
+      if (!this.guide_tpls_map.hasOwnProperty(guide.type)) {
+        this.value.splice(this.value.findIndex((v) => {return v === guide;}), 1);
+      }
     });
+
+    window.addEventListener('click', this.hideGuideSelector);
+  },
+  beforeDestroy() {
+    window.removeEventListener('click', this.hideGuideSelector);
   },
   methods: {
     hideGuideSelector() {
@@ -278,17 +288,11 @@ export default {
         for (let task_id of seq) {
           let task = guide.tasks.find(fe_task => {return task_id === fe_task.id});
           let task_tpl = this.task_tpls.find(fe_task_tpl => {return task.type === fe_task_tpl.type});
-          let old_inputs = {...task.inputs}, new_inputs = {...task.inputs}, old_outputs = {...task.outputs}, new_outputs = {...task.outputs};
-          if (log[task_id].new.hasOwnProperty('inputs')) {
-            new_inputs = log[task_id].new['inputs'];
-            old_inputs = log[task_id].old['inputs'];
+          if (log[task_id].new.state === 'active') {
+            task_tpl.beforeUndoLeave({inputs: log[task_id].new.hasOwnProperty('inputs') ? log[task_id].new['inputs'] : {...task.inputs}});
+          } else {
+            task_tpl.beforeUndoEnter({outputs: log[task_id].new.hasOwnProperty('outputs') ? log[task_id].new['outputs'] : {...task.outputs}});
           }
-          if (log[task_id].new.hasOwnProperty('outputs')) {
-            new_outputs = log[task_id].new['outputs'];
-            old_outputs = log[task_id].old['outputs'];
-          }
-          let event = log[task_id].new.state === 'active' ? task_tpl.beforeUndoLeave : task_tpl.beforeUndoEnter;
-          await this.call(event, [{inputs: new_inputs, outputs: new_outputs, old_inputs, old_outputs}]);
           Object.keys(log[task_id].old).forEach(k => {
             this.$set(task, k, log[task_id].old[k]);
           });
@@ -320,17 +324,11 @@ export default {
         for (let task_id of seq) {
           let task = guide.tasks.find(fe_task => {return task_id === fe_task.id});
           let task_tpl = this.task_tpls.find(fe_task_tpl => {return task.type === fe_task_tpl.type});
-          let old_inputs = {...task.inputs}, new_inputs = {...task.inputs}, old_outputs = {...task.outputs}, new_outputs = {...task.outputs};
-          if (log[task_id].new.hasOwnProperty('inputs')) {
-            new_inputs = log[task_id].new['inputs'];
-            old_inputs = log[task_id].old['inputs'];
+          if (log[task_id].old.state === 'active') {
+            task_tpl.beforeRedoLeave({outputs: log[task_id].new.hasOwnProperty('outputs') ? log[task_id].new['outputs'] : {...task.outputs}});
+          } else {
+            task_tpl.beforeRedoEnter({inputs: log[task_id].new.hasOwnProperty('inputs') ? log[task_id].new['inputs'] : {...task.inputs}});
           }
-          if (log[task_id].new.hasOwnProperty('outputs')) {
-            new_outputs = log[task_id].new['outputs'];
-            old_outputs = log[task_id].old['outputs'];
-          }
-          let event = log[task_id].old.state === 'active' ? task_tpl.beforeUndoLeave : task_tpl.beforeUndoEnter;
-          await this.call(event, [{inputs: new_inputs, outputs: new_outputs, old_inputs, old_outputs}]);
           Object.keys(log[task_id].new).forEach(k => {
             this.$set(task, k, log[task_id].new[k]);
           });
@@ -606,6 +604,27 @@ export default {
     height: max-content;
     position: absolute;
     z-index: 2;
+}
+
+.guide_tpl_option {
+    cursor: pointer;
+    padding: 0 0.8em;
+}
+
+.guide_tpl_option:not(:first-child) {
+    padding-top: 0.3em;
+}
+
+.desc {
+    white-space: break-spaces;
+}
+
+.tasks {
+    padding: 0.5em 0.8em 0.2em;
+}
+
+.task:not(:first-child) {
+    padding-top: 0.2em;
 }
 
 .normal_transition-enter-active, .normal_transition-leave-active {

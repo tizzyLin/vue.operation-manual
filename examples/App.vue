@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <OperationManual v-model="value" :guide_tpls="guide_tpls" :task_tpls="task_tpls" :debug="true" title="操作手册"
-                         style="width: 200px; background-color: rgba(255,255,255,0.5); margin-top: 100px; font-size: 16px;
+                         style="width: 180px; background-color: rgba(255,255,255,0.5); margin-top: 100px; font-size: 14px;
                           margin-left: 1em;padding: 0.3em 0.3em;border-radius: 4px; border: 1px #d7d7d7 solid;box-shadow: 0 1px 2px rgb(0 0 0 / 20%);"></OperationManual>
     </div>
 </template>
@@ -43,7 +43,7 @@ export default {
       task_tpls: [
         {
           type: 'task1',
-          title: 'Task1',
+          title: 'Task11111111111111111111111111111',
           desc: '该任务结束将同时进入 task2 和 task3，并且会带上弹窗输入的值',
           show_do_button: true,
           show_done_button: false,

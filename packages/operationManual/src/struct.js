@@ -8,6 +8,7 @@ export class GuideTpl {
   start_task_inputs;
   hidden;
   allow_undo;
+  allow_redo;
   beforeRemove = () => {return true;};
 }
 
